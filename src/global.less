@@ -1,0 +1,44 @@
+/* antd已经做了样式初始化 */
+/* html,body{
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+div,p,ul,h1,h2,h3,h4,h5{
+  padding: 0;
+  box-sizing: border-box;
+}
+
+li{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+} */
+
+#root{
+  height: 100%;
+}
+
+
+.container{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* antd 的全局样式 */
+.button-color-pink{
+  background-color: #f6cbc6;
+  border-color: #f6cbc6;
+  &:active, &.active{ 
+    background-color: #f4bcbc;
+    border-color: #f4bcbc;
+  }
+  &:hover, &:focus{
+    background-color: #f4bcbc; 
+    border-color: #f4bcbc;
+  }
+}
