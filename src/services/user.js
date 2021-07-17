@@ -12,7 +12,7 @@ export function getUserDetail(id){
 }
 
 export function lockUser(id){
-  return request.get(`/api/admin/users/${id}/lock`)
+  return request.patch(`/api/admin/users/${id}/lock`)
 }
 
 
@@ -23,8 +23,8 @@ export function addUser(user){
 }
 
 
-export function updateUser(userId,user){
-  return request.put('/api/admin/users/'+userId,{
+export function updateUser(id,user){
+  return request.put(`/api/admin/users/${id}`,{
     data:user
   })
 }

@@ -19,10 +19,10 @@ const errorHandler = async (err)=>{
     const data = await response.clone().json();
     const {status_code, message, errors} = data
     
-    if(status_code && message){      //处理业务错误
-      const key = Object.keys(errors)[0]
+    if(status_code && message ){      //处理业务错误
+      const key = Object.keys(errors?errors:{})[0]
       const errMsg = key? errors[key][0] : message
-      console.log(errMsg)
+      // console.log(errMsg)
       notification.error({
         message:`请求错误${status_code}`,
         description: errMsg
@@ -58,7 +58,7 @@ const service = extend({
 // 请求拦截
 service.interceptors.request.use((url, options)=>{
   // const {accessToken} = getDvaApp()._store.getState().auth
-  const accessToken = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBpLnNob3AuZWR1d29yay5jblwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTYyNTMwMTI4NSwiZXhwIjoxNjI1NjYxMjg1LCJuYmYiOjE2MjUzMDEyODUsImp0aSI6IkpqQjg0S0thc3hYOFVtcXQiLCJzdWIiOjEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.cxJoofM3WO_gr3ychnWKg1SLlyVshn6VExARAV4LaEU'
+  const accessToken = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBpLnNob3AuZWR1d29yay5jblwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTYyNjQ5NDMyMCwiZXhwIjoxNjI2ODU0MzIwLCJuYmYiOjE2MjY0OTQzMjAsImp0aSI6IjlmWkpHZmtud3YzcW8zZDMiLCJzdWIiOjEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.y_PDlgJw1urgA63kcsaSuJKVVr4X91bCptjaekS9cJA'
   if(accessToken){
     return {
       url,
@@ -79,11 +79,7 @@ service.interceptors.request.use((url, options)=>{
 
 // 克隆响应对象做解析处理
 service.interceptors.response.use(async response => {
-  const {status} = response
-  console.log(status)
-  // if(status===201 || status===204){
-  //   return {}
-  // }
+  // const {status} = response
   return response //返回后body会被自动解析
 });
 
@@ -103,11 +99,18 @@ export default service
     2.发生错误时，不要返回200
       发生错误时不应该返回200，然后把错误信息（包含错误状态码）放入信息体
 
-
     
 
     3.状态码2xx
     200: 请求成功 （get成功）
     201: created  (post成功，put成功都可以使用)，应该返回创建/修改后的实体
     204: no content （delete成功，put成功都可以，如果get查到null），通常不返回实体
+
+
+    4.请求种类
+    get 获取实体
+    post 创建实体
+    put 整体修改
+    patch 局部修改
+    delete 删除实体
 */

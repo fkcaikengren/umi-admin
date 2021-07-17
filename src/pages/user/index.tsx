@@ -1,9 +1,9 @@
 
-import React,{useState, useEffect, useCallback, useRef} from 'react'
+import React,{useMemo,useState, useEffect, useCallback, useRef} from 'react'
 import { Breadcrumb, Form, Button, Input, Table,Switch, Modal} from 'antd';
 import { ExpandAltOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons';
 import styles from './user.less'
-import { getUsers, addUser, updateUser} from '../../services/user'
+import { getUsers, addUser, updateUser, lockUser} from '../../services/user'
 
 interface QueryValue {
   current: number, 
@@ -14,22 +14,8 @@ interface QueryValue {
 
 function User() {
 
-  const [users, setUsers] = useState([])
-  const [pagination, setPagination] = useState({current_page:1, total:0 , per_page:0})
-  const [query, setQuery] = useState({current:0, name:'', email:''})
-  const [addModalVisible, setAddModalVisible] = useState(false)
-  const [editModalvisible, setEditModalvisible] = useState(false)
-  const [curRecord, setCurRecord] = useState({
-    id: 0,
-    name: '',
-    email: ''
-  })
 
-  const userFormRef = useRef(null)
-
-
-
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: '头像',
       dataIndex: 'avatar_url',
@@ -50,7 +36,13 @@ function User() {
       title: '是否禁用',
       dataIndex: 'is_locked',
       key: 'is_locked',
-      render:  num => <Switch checkedChildren="开启" unCheckedChildren="禁用" defaultChecked={num!==0} />
+      render:  (num, record) => <Switch checkedChildren="开启" unCheckedChildren="禁用" defaultChecked={num!==0}  onChange={useCallback((checked)=>{
+        lockUser(record.id).then(()=>{
+          queryUsers()
+        }).catch(()=>{
+          // do nothing
+        })
+      }, [lockUser])}/>
     },
     {
       title: '创建时间',
@@ -72,8 +64,23 @@ function User() {
         }, [record,setEditModalvisible])}>编辑</Button>
       )
     }
-  ]
-  
+  ], [])
+  const [users, setUsers] = useState([])
+  const [pagination, setPagination] = useState({current_page:1, total:0 , per_page:0})
+  const [query, setQuery] = useState({current:0, name:'', email:''})
+  const [addModalVisible, setAddModalVisible] = useState(false)
+  const [editModalvisible, setEditModalvisible] = useState(false)
+  const [curRecord, setCurRecord] = useState({
+    id: 0,
+    name: '',
+    email: ''
+  })
+  const [loading, setLoading] = useState(false)
+
+  const userFormRef = useRef(null)
+
+
+
 
   useEffect(() => {
     queryUsers()
@@ -93,14 +100,16 @@ function User() {
     (newQuery) => {
       
       let params = (newQuery && newQuery.current)?newQuery:query
+      setLoading(true)
       return getUsers(params).then(result=>{
+        setLoading(false)
         if(result){
           setUsers(result.data)
           setPagination(result.meta.pagination)
         }
       })
     },
-    [query],
+    [query,setLoading],
   )
 
   const changeQueryName = useCallback(
@@ -171,7 +180,7 @@ function User() {
 
   return (
     <div>
-      <div className={styles.breadcrumb_wrap}>
+      <div className='breadcrumb-wrap'>
         <Breadcrumb>
           <Breadcrumb.Item>
             <a href="/">首页</a>
@@ -182,7 +191,7 @@ function User() {
         </Breadcrumb>
       </div>
     
-      <div className={styles.card}>
+      <div className='card'>
         <Form layout="inline" onFinish={queryUsers}>
           <Form.Item label="姓名">
             <Input value={query.name} onChange={changeQueryName}/>
@@ -200,9 +209,9 @@ function User() {
           </div>
         </Form>
       </div>
-      <div className={styles.card}>
-      <div className={styles.row_between}>
-          <span className={styles.table_titile}>用户列表</span>
+      <div className='card'>
+        <div className='row-between pd-bottom-m'>
+          <span className='table-titile'>用户列表</span>
           <div className={styles.action_pane}>
             <Button type="primary" icon={<PlusOutlined/> } 
               onClick={useCallback(()=>setAddModalVisible(true),  [])}
@@ -214,7 +223,9 @@ function User() {
         <Table columns={columns} dataSource={users} 
           rowKey={record=>record.id}
           pagination={{ current:pagination.current_page, total:pagination.total, pageSize:pagination.per_page, pageSizeOptions:['10']}}
-          onChange={onTableChange}/>,
+          onChange={onTableChange}
+          loading={loading} 
+        />,
       </div>
 
       {/* user Modal */}
