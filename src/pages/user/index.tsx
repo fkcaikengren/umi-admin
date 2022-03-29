@@ -97,7 +97,7 @@ function User() {
   }, [userFormRef, addModalVisible, editModalvisible])
 
   const queryUsers = useCallback(
-    (newQuery) => {
+    (newQuery?) => {
       
       let params = (newQuery && newQuery.current)?newQuery:query
       setLoading(true)

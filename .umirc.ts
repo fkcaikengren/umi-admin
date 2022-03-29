@@ -10,5 +10,12 @@ export default defineConfig({
   // routes
   // history
   fastRefresh: {},
-  // mock: false
+  // mock: false,
+  alias: {
+    components: '/src/components',
+    models: '/src/models',
+    services: '/src/services',
+    utils: '/src/utils',
+    assets: '/src/assets'
+  },
 });
